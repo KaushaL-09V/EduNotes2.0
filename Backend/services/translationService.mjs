@@ -19,12 +19,12 @@ export const translateText = async (text, targetLang, sourceLang = 'auto') => {
     }
 
     console.log(`Translating from ${sourceLang} to ${targetLang}...`);
-    
+
     // Add small delay to avoid rate limiting
     await delay(100);
-    
+
     const res = await translate(text, { from: sourceLang, to: targetLang });
-    
+
     return {
       success: true,
       translatedText: res.text,
@@ -85,7 +85,7 @@ export const translateStructuredNotes = async (structuredNotes, targetLang) => {
       translatedNotes.sections = [];
       for (const section of structuredNotes.sections) {
         const translatedSection = { ...section };
-        
+
         // Translate heading
         if (section.heading) {
           const headingResult = await translateText(section.heading, targetLang);
@@ -93,7 +93,7 @@ export const translateStructuredNotes = async (structuredNotes, targetLang) => {
           if (headingResult.success) successCount++;
           else failCount++;
         }
-        
+
         // Translate content
         if (section.content) {
           const contentResult = await translateText(section.content, targetLang);
@@ -101,7 +101,7 @@ export const translateStructuredNotes = async (structuredNotes, targetLang) => {
           if (contentResult.success) successCount++;
           else failCount++;
         }
-        
+
         // Translate key points in section
         if (section.keyPoints && Array.isArray(section.keyPoints)) {
           translatedSection.keyPoints = [];
@@ -112,7 +112,7 @@ export const translateStructuredNotes = async (structuredNotes, targetLang) => {
             else failCount++;
           }
         }
-        
+
         translatedNotes.sections.push(translatedSection);
       }
     }
@@ -151,9 +151,9 @@ export const detectLanguage = async (text) => {
     };
   } catch (error) {
     console.error('Language detection error:', error.message);
-    return { 
+    return {
       success: false,
-      language: 'en', 
+      language: 'en',
       languageName: 'English',
       confidence: 0,
       error: error.message

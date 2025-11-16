@@ -1,9 +1,11 @@
 # Translation API Documentation
 
 ## Overview
+
 The StenoMind backend now includes translation functionality using the `google-translate-api` package. This allows users to translate their generated notes into multiple languages.
 
 ## Features
+
 - ✅ Translate entire notes (structured content)
 - ✅ Translate individual text sections
 - ✅ Auto-detect source language
@@ -13,11 +15,13 @@ The StenoMind backend now includes translation functionality using the `google-t
 ## API Endpoints
 
 ### 1. Translate Entire Note
+
 Translates all content of a note including summary, key points, and sections.
 
 **Endpoint:** `POST /api/notes/:id/translate`
 
 **Headers:**
+
 ```json
 {
   "Authorization": "Bearer <token>",
@@ -26,6 +30,7 @@ Translates all content of a note including summary, key points, and sections.
 ```
 
 **Request Body:**
+
 ```json
 {
   "targetLang": "es"
@@ -33,6 +38,7 @@ Translates all content of a note including summary, key points, and sections.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -54,11 +60,13 @@ Translates all content of a note including summary, key points, and sections.
 ```
 
 ### 2. Translate Text
+
 Translates arbitrary text content.
 
 **Endpoint:** `POST /api/notes/translate-text`
 
 **Headers:**
+
 ```json
 {
   "Authorization": "Bearer <token>",
@@ -67,6 +75,7 @@ Translates arbitrary text content.
 ```
 
 **Request Body:**
+
 ```json
 {
   "text": "Hello, how are you?",
@@ -76,6 +85,7 @@ Translates arbitrary text content.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -93,11 +103,13 @@ Translates arbitrary text content.
 ```
 
 ### 3. Get Supported Languages
+
 Returns list of all supported languages.
 
 **Endpoint:** `GET /api/notes/languages`
 
 **Headers:**
+
 ```json
 {
   "Authorization": "Bearer <token>"
@@ -105,6 +117,7 @@ Returns list of all supported languages.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -119,105 +132,109 @@ Returns list of all supported languages.
 
 ## Supported Languages
 
-| Language | Code | Language | Code |
-|----------|------|----------|------|
-| English | `en` | Spanish | `es` |
-| French | `fr` | German | `de` |
-| Hindi | `hi` | Chinese (Simplified) | `zh-CN` |
-| Chinese (Traditional) | `zh-TW` | Japanese | `ja` |
-| Korean | `ko` | Arabic | `ar` |
-| Portuguese | `pt` | Russian | `ru` |
-| Italian | `it` | Dutch | `nl` |
-| Polish | `pl` | Turkish | `tr` |
-| Vietnamese | `vi` | Thai | `th` |
-| Indonesian | `id` | Malay | `ms` |
-| Bengali | `bn` | Tamil | `ta` |
-| Telugu | `te` | Marathi | `mr` |
-| Gujarati | `gu` | Kannada | `kn` |
-| Malayalam | `ml` | Punjabi | `pa` |
-| Urdu | `ur` | Persian | `fa` |
-| Hebrew | `he` | Swedish | `sv` |
-| Norwegian | `no` | Danish | `da` |
-| Finnish | `fi` | Greek | `el` |
-| Czech | `cs` | Romanian | `ro` |
-| Hungarian | `hu` | Ukrainian | `uk` |
-| Bulgarian | `bg` | Serbian | `sr` |
-| Croatian | `hr` | Slovak | `sk` |
-| Slovenian | `sl` | | |
+| Language              | Code    | Language             | Code    |
+| --------------------- | ------- | -------------------- | ------- |
+| English               | `en`    | Spanish              | `es`    |
+| French                | `fr`    | German               | `de`    |
+| Hindi                 | `hi`    | Chinese (Simplified) | `zh-CN` |
+| Chinese (Traditional) | `zh-TW` | Japanese             | `ja`    |
+| Korean                | `ko`    | Arabic               | `ar`    |
+| Portuguese            | `pt`    | Russian              | `ru`    |
+| Italian               | `it`    | Dutch                | `nl`    |
+| Polish                | `pl`    | Turkish              | `tr`    |
+| Vietnamese            | `vi`    | Thai                 | `th`    |
+| Indonesian            | `id`    | Malay                | `ms`    |
+| Bengali               | `bn`    | Tamil                | `ta`    |
+| Telugu                | `te`    | Marathi              | `mr`    |
+| Gujarati              | `gu`    | Kannada              | `kn`    |
+| Malayalam             | `ml`    | Punjabi              | `pa`    |
+| Urdu                  | `ur`    | Persian              | `fa`    |
+| Hebrew                | `he`    | Swedish              | `sv`    |
+| Norwegian             | `no`    | Danish               | `da`    |
+| Finnish               | `fi`    | Greek                | `el`    |
+| Czech                 | `cs`    | Romanian             | `ro`    |
+| Hungarian             | `hu`    | Ukrainian            | `uk`    |
+| Bulgarian             | `bg`    | Serbian              | `sr`    |
+| Croatian              | `hr`    | Slovak               | `sk`    |
+| Slovenian             | `sl`    |                      |         |
 
 ## Usage Examples
 
 ### Frontend Usage (React)
 
 #### Translate Entire Note
+
 ```javascript
 const translateNote = async (noteId, targetLang) => {
   try {
     const response = await fetch(`/api/notes/${noteId}/translate`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-      body: JSON.stringify({ targetLang })
+      body: JSON.stringify({ targetLang }),
     });
-    
+
     const data = await response.json();
-    
+
     if (data.success) {
       // Update UI with translated content
-      console.log('Translated:', data.data.translatedNotes);
+      console.log("Translated:", data.data.translatedNotes);
     }
   } catch (error) {
-    console.error('Translation failed:', error);
+    console.error("Translation failed:", error);
   }
 };
 
 // Usage
-translateNote('note-id-123', 'es'); // Translate to Spanish
+translateNote("note-id-123", "es"); // Translate to Spanish
 ```
 
 #### Translate Section Text
+
 ```javascript
 const translateSection = async (text, targetLang) => {
   try {
-    const response = await fetch('/api/notes/translate-text', {
-      method: 'POST',
+    const response = await fetch("/api/notes/translate-text", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-      body: JSON.stringify({ 
-        text, 
+      body: JSON.stringify({
+        text,
         targetLang,
-        sourceLang: 'auto' 
-      })
+        sourceLang: "auto",
+      }),
     });
-    
+
     const data = await response.json();
-    
+
     if (data.success) {
       return data.data.translatedText;
     }
   } catch (error) {
-    console.error('Translation failed:', error);
+    console.error("Translation failed:", error);
     return text; // Return original text on error
   }
 };
 
 // Usage
 const translatedText = await translateSection(
-  'This is a section of my notes', 
-  'fr'
+  "This is a section of my notes",
+  "fr"
 );
 ```
 
 ## Translation Service Methods
 
 ### `translateText(text, targetLang, sourceLang = 'auto')`
+
 Translates a single piece of text.
 
 **Parameters:**
+
 - `text` (string): Text to translate
 - `targetLang` (string): Target language code
 - `sourceLang` (string, optional): Source language code (defaults to 'auto' for auto-detection)
@@ -225,23 +242,28 @@ Translates a single piece of text.
 **Returns:** Object with translation result
 
 ### `translateStructuredNotes(structuredNotes, targetLang)`
+
 Translates an entire structured notes object, including summary, key points, and all sections.
 
 **Parameters:**
+
 - `structuredNotes` (object): Structured notes object
 - `targetLang` (string): Target language code
 
 **Returns:** Object with translated structured notes
 
 ### `detectLanguage(text)`
+
 Detects the language of given text.
 
 **Parameters:**
+
 - `text` (string): Text to detect language for
 
 **Returns:** Object with detected language info
 
 ### `getSupportedLanguages()`
+
 Returns array of supported languages with codes and names.
 
 **Returns:** Array of language objects
@@ -259,6 +281,7 @@ All translation endpoints return consistent error responses:
 ```
 
 Common error scenarios:
+
 - **401 Unauthorized:** User not authenticated
 - **400 Bad Request:** Missing required parameters
 - **404 Not Found:** Note not found or no permission
@@ -276,6 +299,7 @@ The NoteViewer component now includes:
 4. **Real-time Updates** - Translated content updates immediately in UI
 
 ### Features:
+
 - ✅ Preserves note structure
 - ✅ Shows translation status
 - ✅ Handles errors gracefully

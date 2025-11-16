@@ -303,7 +303,7 @@ export const updateNote = async (req, res) => {
 
     // Update allowed fields
     const allowedUpdates = ['title', 'structuredNotes', 'tags', 'folder', 'fullContent'];
-    
+
     Object.keys(updates).forEach(key => {
       if (allowedUpdates.includes(key)) {
         note[key] = updates[key];
@@ -409,7 +409,7 @@ export const regenerateNotes = async (req, res) => {
 
     // Find existing note and verify ownership
     const note = await Note.findOne({ _id: id, user: userId }).populate('video');
-    
+
     if (!note) {
       return res.status(404).json({
         success: false,
@@ -492,7 +492,7 @@ export const translateNote = async (req, res) => {
 
     // Find note and verify ownership
     const note = await Note.findOne({ _id: id, user: userId }).populate('video');
-    
+
     if (!note) {
       return res.status(404).json({
         success: false,
