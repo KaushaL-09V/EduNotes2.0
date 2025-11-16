@@ -1,20 +1,13 @@
 // Dashboard.jsx
 import { useMemo, useState } from "react";
-import { Search, FolderOpen, FileText, Plus, Download, ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
+import { Search, FolderOpen, FileText, Plus, Download, ArrowRight, TrendingUp, Tag, Clock, Sparkles } from "lucide-react";
 import { useNotes } from "../Context/NotesContext";
-import { useNavigate } from "react-router-dom"; // optional if you use react-router
+import ClickSpark from "../Components/ClickSpark";
 
 export default function Dashboard() {
   const { notes = [], loading, error } = useNotes();
   const [searchQuery, setSearchQuery] = useState("");
-  // Call useNavigate unconditionally (hook) but guard runtime errors
-  // (e.g. when not inside a Router) and fall back to null.
-  let navigate;
-  try {
-    navigate = useNavigate();
-  } catch (err) {
-    navigate = null;
-  }
 
   // ----- Filtering for small preview on the dashboard -----
   const filteredNotes = useMemo(() => {
@@ -160,74 +153,143 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Hero */}
-      <div className="bg-linear-to-r from-indigo-600 to-purple-600 rounded-2xl shadow-lg p-8 text-white lg:flex lg:items-center lg:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Welcome back! 👋</h1>
-          <p className="text-indigo-100 max-w-2xl">
-            Continue your learning journey. Here's a quick summary of your notes and activity.
-          </p>
-          <div className="mt-4 flex gap-3">
-            <button
-              onClick={() => navigate ? navigate("/notes/new") : window.location.assign("/notes/new")}
-              className="inline-flex items-center gap-2 bg-white text-indigo-600 px-4 py-2 rounded-xl font-medium shadow"
-            >
-              <Plus className="w-4 h-4" />
-              Create Note
-            </button>
-            <button
-              onClick={exportCSV}
-              className="inline-flex items-center gap-2 bg-indigo-700/20 hover:bg-indigo-700/25 text-white px-4 py-2 rounded-xl"
-            >
-              <Download className="w-4 h-4" />
-              Export CSV
-            </button>
-            <button
-              onClick={() => navigate ? navigate("/notes") : window.location.assign("/notes")}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/20 text-white rounded-xl"
-            >
-              View All Notes
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+      {/* Hero Section with Gradient */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative bg-linear-to-r from-indigo-600 to-purple-600 rounded-3xl shadow-2xl p-8 overflow-hidden"
+      >
+        {/* Decorative circles */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
+        
+        <div className="relative z-10">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div className="flex-1">
+              <motion.h1
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
+                className="text-4xl font-bold text-white mb-3 flex items-center gap-3"
+              >
+                Welcome back! <span className="animate-wave">👋</span>
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+                className="text-indigo-100 max-w-2xl text-lg"
+              >
+                Continue your learning journey. Here's a quick summary of your notes and activity.
+              </motion.p>
 
-        <div className="mt-6 lg:mt-0 grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {/* KPI cards */}
-          <div className="bg-white/10 backdrop-blur rounded-xl p-4">
-            <div className="text-xs text-indigo-100">Total notes</div>
-            <div className="text-2xl font-bold">{totals.totalNotes}</div>
-            <div className="text-xs text-indigo-100 mt-2">Recent: {recentNotes.length}</div>
-          </div>
-          <div className="bg-white/10 backdrop-blur rounded-xl p-4">
-            <div className="text-xs text-indigo-100">Pinned</div>
-            <div className="text-2xl font-bold">{totals.pinned}</div>
-            <div className="text-xs text-indigo-100 mt-2">Keep important notes handy</div>
-          </div>
-          <div className="bg-white/10 backdrop-blur rounded-xl p-4">
-            <div className="text-xs text-indigo-100">Tags</div>
-            <div className="text-2xl font-bold">{totals.tagCount}</div>
-            <div className="text-xs text-indigo-100 mt-2">Top tags below</div>
-          </div>
-          <div className="bg-white/10 backdrop-blur rounded-xl p-4">
-            <div className="text-xs text-indigo-100">Avg / week</div>
-            <div className="text-2xl font-bold">{totals.avgPerWeek}</div>
-            <div className="text-xs text-indigo-100 mt-2">
-              Activity
-              <span className="ml-2 inline-block align-middle">
-                <Sparkline points={activity} />
-              </span>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mt-6 flex flex-wrap gap-3"
+              >
+                <ClickSpark sparkColor="#fff" sparkCount={8}>
+                  <button className="inline-flex items-center gap-2 bg-white text-indigo-600 px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition cursor-target">
+                    <Plus className="w-5 h-5" />
+                    Create Note
+                  </button>
+                </ClickSpark>
+
+                <ClickSpark sparkColor="#fff" sparkCount={6}>
+                  <button
+                    onClick={exportCSV}
+                    className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-6 py-3 rounded-xl font-semibold transition cursor-target"
+                  >
+                    <Download className="w-5 h-5" />
+                    Export CSV
+                  </button>
+                </ClickSpark>
+              </motion.div>
+            </div>
+
+            {/* KPI Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-2 gap-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4 }}
+                whileHover={{ scale: 1.05 }}
+                className="bg-white/10 backdrop-blur-xl rounded-2xl p-5 border border-white/20 cursor-target"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <FileText className="w-5 h-5 text-white" />
+                  <div className="text-xs text-indigo-100">Total Notes</div>
+                </div>
+                <div className="text-3xl font-bold text-white">{totals.totalNotes}</div>
+                <div className="text-xs text-indigo-200 mt-1">Recent: {recentNotes.length}</div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5 }}
+                whileHover={{ scale: 1.05 }}
+                className="bg-white/10 backdrop-blur-xl rounded-2xl p-5 border border-white/20 cursor-target"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <Tag className="w-5 h-5 text-white" />
+                  <div className="text-xs text-indigo-100">Tags</div>
+                </div>
+                <div className="text-3xl font-bold text-white">{totals.tagCount}</div>
+                <div className="text-xs text-indigo-200 mt-1">Categories</div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.6 }}
+                whileHover={{ scale: 1.05 }}
+                className="bg-white/10 backdrop-blur-xl rounded-2xl p-5 border border-white/20 cursor-target"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <TrendingUp className="w-5 h-5 text-white" />
+                  <div className="text-xs text-indigo-100">Avg / Week</div>
+                </div>
+                <div className="text-3xl font-bold text-white">{totals.avgPerWeek}</div>
+                <div className="text-xs text-indigo-200 mt-1 flex items-center gap-2">
+                  <Sparkline points={activity} />
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.7 }}
+                whileHover={{ scale: 1.05 }}
+                className="bg-white/10 backdrop-blur-xl rounded-2xl p-5 border border-white/20 cursor-target"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <Clock className="w-5 h-5 text-white" />
+                  <div className="text-xs text-indigo-100">Folders</div>
+                </div>
+                <div className="text-3xl font-bold text-white">{folderCounts.length}</div>
+                <div className="text-xs text-indigo-200 mt-1">Categories</div>
+              </motion.div>
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Main grid */}
+      {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left: Recent notes preview */}
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Recent notes</h2>
+        {/* Recent Notes - Takes 2 columns */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="lg:col-span-2 bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-gray-200/50 p-8"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <Sparkles className="w-6 h-6 text-indigo-600" />
+              Recent Notes
+            </h2>
             <div className="flex items-center gap-3">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -235,16 +297,10 @@ export default function Dashboard() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search your recent notes..."
-                  className="pl-9 pr-3 py-2 border border-gray-200 rounded-xl text-sm w-64"
+                  placeholder="Search notes..."
+                  className="pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl text-sm w-64 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition cursor-target"
                 />
               </div>
-              <button
-                onClick={() => navigate ? navigate("/notes") : window.location.assign("/notes")}
-                className="px-3 py-2 bg-gray-100 rounded-xl text-sm"
-              >
-                <FolderOpen className="w-4 h-4 inline-block mr-1" /> All notes
-              </button>
             </div>
           </div>
 
@@ -252,39 +308,45 @@ export default function Dashboard() {
           {error && <p className="text-sm text-red-600">{error}</p>}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredNotes.slice(0, 6).map((note) => (
-              <article
+            {filteredNotes.slice(0, 6).map((note, index) => (
+              <motion.article
                 key={note._id}
-                className="border border-gray-200 rounded-xl p-4 hover:shadow-lg transition cursor-pointer"
-                onClick={() => (navigate ? navigate(`/notes/${note._id}`) : (window.location.href = `/notes/${note._id}`))}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 * index }}
+                whileHover={{ y: -5, scale: 1.02 }}
+                className="border border-gray-200 rounded-2xl p-5 hover:shadow-2xl hover:border-indigo-300 transition-all cursor-pointer bg-white cursor-target group"
               >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center">
-                      <FileText className="w-5 h-5 text-indigo-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 line-clamp-2">{note.title}</h3>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {note.folder || "General"} • {note.createdAt ? new Date(note.createdAt).toLocaleDateString() : ""}
-                      </div>
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="w-12 h-12 bg-linear-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shrink-0">
+                    <FileText className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-gray-900 line-clamp-2 group-hover:text-indigo-600 transition">
+                      {note.title}
+                    </h3>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {note.folder || "General"} • {note.createdAt ? new Date(note.createdAt).toLocaleDateString() : ""}
                     </div>
                   </div>
                 </div>
 
-                <p className="text-sm text-gray-600 mb-3 line-clamp-3">{note.structuredNotes?.summary || (note.fullContent || note.content || "").slice(0, 160)}</p>
+                <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+                  {note.structuredNotes?.summary || (note.fullContent || note.content || "").slice(0, 160)}
+                </p>
 
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                  <div className="flex gap-2">
-                    {(note.structuredNotes?.tags || note.tags || []).slice(0, 3).map((t) => (
-                      <span key={t} className="px-2 py-1 bg-indigo-50 text-indigo-700 rounded text-xs">#{t}</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap gap-1">
+                    {(note.structuredNotes?.tags || note.tags || []).slice(0, 2).map((t) => (
+                      <span key={t} className="px-2 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-medium">
+                        #{t}
+                      </span>
                     ))}
                   </div>
-                  <div>
+                  <ClickSpark sparkColor="#6366f1" sparkCount={4} sparkRadius={10}>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        // quick export single note
                         const text = note.fullContent || note.content || note.structuredNotes?.summary || "";
                         const blob = new Blob([text], { type: "text/plain" });
                         const url = URL.createObjectURL(blob);
@@ -296,65 +358,106 @@ export default function Dashboard() {
                         a.remove();
                         URL.revokeObjectURL(url);
                       }}
-                      className="px-2 py-1 bg-gray-100 rounded text-xs"
+                      className="p-2 bg-gray-100 rounded-lg hover:bg-indigo-100 transition cursor-target"
                     >
-                      <Download className="w-3 h-3 inline-block mr-1" /> Export
+                      <Download className="w-4 h-4 text-gray-600" />
                     </button>
-                  </div>
+                  </ClickSpark>
                 </div>
-              </article>
+              </motion.article>
             ))}
 
-            {/* If none */}
             {!loading && filteredNotes.length === 0 && (
-              <div className="col-span-full text-center py-8 text-sm text-gray-500">
-                No notes match your search. Try creating new notes or generate from a transcript.
+              <div className="col-span-full text-center py-12">
+                <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500 text-lg">No notes match your search.</p>
+                <p className="text-gray-400 text-sm">Try creating new notes or generate from a transcript.</p>
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
 
-        {/* Right: Insights */}
-        <aside className="bg-white rounded-2xl shadow-lg p-6">
-          <h3 className="text-lg font-semibold mb-3">Insights</h3>
+        {/* Quick Actions Sidebar - Takes 1 column */}
+        <motion.aside
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3 }}
+          className="space-y-6"
+        >
+          {/* Quick Actions */}
+          <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-gray-200/50 p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-indigo-600" />
+              Quick Actions
+            </h3>
+            <div className="space-y-3">
+              <ClickSpark sparkColor="#6366f1" sparkCount={6}>
+                <button className="w-full px-4 py-3 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition cursor-target">
+                  Generate New Notes
+                </button>
+              </ClickSpark>
+              <ClickSpark sparkColor="#6366f1" sparkCount={4}>
+                <button className="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition cursor-target flex items-center justify-center gap-2">
+                  <FolderOpen className="w-5 h-5" />
+                  Browse All Notes
+                </button>
+              </ClickSpark>
+              <ClickSpark sparkColor="#6366f1" sparkCount={4}>
+                <button
+                  onClick={exportCSV}
+                  className="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition cursor-target flex items-center justify-center gap-2"
+                >
+                  <Download className="w-5 h-5" />
+                  Export All Data
+                </button>
+              </ClickSpark>
+            </div>
+          </div>
 
-          <div className="mb-4">
-            <p className="text-sm text-gray-600 mb-2">Folders</p>
+          {/* Folders Breakdown */}
+          <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-gray-200/50 p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">📁 Folders</h3>
             <FolderBarChart data={folderCounts} />
           </div>
 
-          <div className="mb-4">
-            <p className="text-sm text-gray-600 mb-2">Top tags</p>
+          {/* Top Tags */}
+          <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-gray-200/50 p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">🏷️ Top Tags</h3>
             <div className="flex flex-wrap gap-2">
               {topTags.length === 0 && <p className="text-xs text-gray-500">No tags yet</p>}
               {topTags.map((t) => (
-                <button
+                <motion.button
                   key={t.tag}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => setSearchQuery(t.tag)}
-                  className={`px-3 py-1 rounded-full text-xs ${t.count > 3 ? "bg-indigo-600 text-white" : "bg-indigo-50 text-indigo-700"}`}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition cursor-target ${
+                    t.count > 3
+                      ? "bg-indigo-600 text-white"
+                      : "bg-indigo-50 text-indigo-700"
+                  }`}
                   title={`${t.count} notes`}
                 >
-                  #{t.tag} {t.count > 1 && <span className="text-xs ml-1 opacity-70">({t.count})</span>}
-                </button>
+                  #{t.tag} {t.count > 1 && <span className="ml-1 opacity-70">({t.count})</span>}
+                </motion.button>
               ))}
             </div>
           </div>
 
-          <div className="mt-6">
-            <p className="text-sm text-gray-600 mb-2">Recent activity (last 14 days)</p>
+          {/* Activity Chart */}
+          <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-gray-200/50 p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">📊 Activity (14 days)</h3>
             <div className="flex items-center justify-between">
               <Sparkline points={activity} />
               <div className="text-right">
-                <div className="text-sm font-semibold">{activity.reduce((a, b) => a + b, 0)}</div>
+                <div className="text-2xl font-bold text-indigo-600">
+                  {activity.reduce((a, b) => a + b, 0)}
+                </div>
                 <div className="text-xs text-gray-500">notes</div>
               </div>
             </div>
           </div>
-
-          <div className="mt-6 text-xs text-gray-500">
-            Tip: click a tag to quickly filter results. Use Export CSV to backup all notes.
-          </div>
-        </aside>
+        </motion.aside>
       </div>
     </div>
   );

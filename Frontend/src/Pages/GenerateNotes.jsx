@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { useNotes } from "../Context/NotesContext";
 import { Video, Sparkles, Loader2, Save, CheckCircle, AlertCircle, FileText, List, BookOpen } from "lucide-react";
 import NoteViewer from "./NoteViewer";
 import FolderSelectModal from "../Components/FolderSelectModal";
+import ClickSpark from "../Components/ClickSpark";
 import { apiRequest } from "../lib/apiClient";
 
 // Note generation styles with their configurations
@@ -253,66 +255,81 @@ function GenerateNotes() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-2xl shadow-lg p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-          <Video className="w-6 h-6 text-indigo-600" />
-          Generate AI Notes
-        </h2>
-        <div className="space-y-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200/50 p-8"
+      >
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-14 h-14 bg-linear-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center">
+            <Video className="w-7 h-7 text-white" />
+          </div>
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900">Generate AI Notes</h2>
+            <p className="text-gray-600">Transform YouTube videos into structured notes</p>
+          </div>
+        </div>
+
+        <div className="space-y-5">
           <div className="grid gap-2">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-semibold text-gray-700">
               YouTube Video URL <span className="text-red-500">*</span>
             </label>
             <input
               type="url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+              className="px-4 py-3.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition cursor-target"
               placeholder="https://youtube.com/watch?v=..."
               disabled={loading.transcript}
             />
           </div>
 
           <div className="grid gap-2">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-semibold text-gray-700">
               Video Title (optional)
             </label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+              className="px-4 py-3.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition cursor-target"
               placeholder="Give this video a custom name"
               disabled={loading.transcript}
             />
           </div>
 
-          <button
-            onClick={handleFetchTranscript}
-            disabled={!url.trim() || loading.transcript}
-            className="w-full sm:w-auto px-6 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
-          >
-            {loading.transcript ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Fetching Transcript...
-              </>
-            ) : (
-              "Fetch Transcript"
-            )}
-          </button>
+          <ClickSpark sparkColor="#6366f1" sparkCount={8} sparkRadius={20}>
+            <button
+              onClick={handleFetchTranscript}
+              disabled={!url.trim() || loading.transcript}
+              className="w-full sm:w-auto px-8 py-4 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-target"
+            >
+              {loading.transcript ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Fetching Transcript...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-5 h-5" />
+                  Fetch Transcript
+                </>
+              )}
+            </button>
+          </ClickSpark>
 
           {/* Messages */}
           {error && (
             <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
               <p className="text-sm text-red-600">{error}</p>
             </div>
           )}
           
           {successMessage && (
             <div className="flex items-start gap-2 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
-              <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+              <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
               <p className="text-sm text-emerald-600">{successMessage}</p>
             </div>
           )}
@@ -349,7 +366,7 @@ function GenerateNotes() {
 
           {/* Transcript Preview with Note Style Selection */}
           {transcriptData && (
-            <div className="p-4 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl space-y-4 border border-indigo-100">
+            <div className="p-4 bg-linear-to-br from-indigo-50 to-purple-50 rounded-xl space-y-4 border border-indigo-100">
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-semibold text-gray-900">Transcript Ready</h3>
@@ -418,37 +435,43 @@ function GenerateNotes() {
                 </div>
               </div>
 
-              <button
-                onClick={handleGenerateNotes}
-                disabled={loading.notes}
-                className="w-full px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg transform hover:-translate-y-0.5 transition disabled:opacity-50 disabled:transform-none flex items-center justify-center gap-2"
-              >
-                {loading.notes ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Generating {NOTE_STYLES[selectedStyle].label} Notes...
-                  </>
-                ) : generatedNotes && generatedWithStyle !== selectedStyle ? (
-                  <>
-                    <Sparkles className="w-5 h-5" />
-                    Regenerate as {NOTE_STYLES[selectedStyle].label}
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-5 h-5" />
-                    Generate {NOTE_STYLES[selectedStyle].label} Notes
-                  </>
-                )}
-              </button>
+              <ClickSpark sparkColor="#6366f1" sparkCount={8} sparkRadius={20}>
+                <button
+                  onClick={handleGenerateNotes}
+                  disabled={loading.notes}
+                  className="w-full px-6 py-3 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg transform hover:-translate-y-0.5 transition disabled:opacity-50 disabled:transform-none flex items-center justify-center gap-2 cursor-target"
+                >
+                  {loading.notes ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Generating {NOTE_STYLES[selectedStyle].label} Notes...
+                    </>
+                  ) : generatedNotes && generatedWithStyle !== selectedStyle ? (
+                    <>
+                      <Sparkles className="w-5 h-5" />
+                      Regenerate as {NOTE_STYLES[selectedStyle].label}
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-5 h-5" />
+                      Generate {NOTE_STYLES[selectedStyle].label} Notes
+                    </>
+                  )}
+                </button>
+              </ClickSpark>
             </div>
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* Generated Notes Section */}
       {generatedNotes && (
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white rounded-xl shadow-lg p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-4"
+        >
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-200/50 p-6">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="font-semibold text-gray-900">Your AI-Generated Notes</h3>
@@ -467,14 +490,16 @@ function GenerateNotes() {
                 )}
               </p>
             </div>
-            <button
-              onClick={handleSaveClick}
-              disabled={loading.saving}
-              className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg transform hover:-translate-y-0.5 transition disabled:opacity-50 disabled:transform-none flex items-center justify-center gap-2"
-            >
-              <Save className="w-5 h-5" />
-              Save to Library
-            </button>
+            <ClickSpark sparkColor="#6366f1" sparkCount={6}>
+              <button
+                onClick={handleSaveClick}
+                disabled={loading.saving}
+                className="w-full sm:w-auto px-6 py-3 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg transform hover:-translate-y-0.5 transition disabled:opacity-50 disabled:transform-none flex items-center justify-center gap-2 cursor-target"
+              >
+                <Save className="w-5 h-5" />
+                Save to Library
+              </button>
+            </ClickSpark>
           </div>
 
           <NoteViewer
@@ -490,7 +515,7 @@ function GenerateNotes() {
               },
             }}
           />
-        </div>
+        </motion.div>
       )}
 
       {/* Folder Selection Modal */}

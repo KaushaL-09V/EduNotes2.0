@@ -461,6 +461,171 @@ export const regenerateNotes = async (req, res) => {
   }
 };
 
+/**
+ * POST /api/notes/:id/translate
+ * Translate a note to a different language
+ */
+export const translateNote = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { targetLang } = req.body;
+    const userId = req.user?._id;
+
+    console.log("=== BACKEND: Translate Note ===");
+    console.log("Note ID:", id);
+    console.log("Target Language:", targetLang);
+    console.log("User ID:", userId);
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "User not authenticated",
+      });
+    }
+
+    if (!targetLang) {
+      return res.status(400).json({
+        success: false,
+        message: "Target language is required",
+      });
+    }
+
+    // Find note and verify ownership
+    const note = await Note.findOne({ _id: id, user: userId }).populate('video');
+    
+    if (!note) {
+      return res.status(404).json({
+        success: false,
+        message: "Note not found or you don't have permission to translate it",
+      });
+    }
+
+    // Import translation service
+    const translationService = await import('../services/translationService.mjs');
+
+    // Translate structured notes
+    const translationResult = await translationService.translateStructuredNotes(
+      note.structuredNotes,
+      targetLang
+    );
+
+    if (!translationResult.success) {
+      return res.status(500).json({
+        success: false,
+        message: "Translation failed",
+        error: translationResult.error
+      });
+    }
+
+    // Generate full content from translated notes
+    const translatedFullContent = aiService.generateFullContent(translationResult.translatedNotes);
+
+    console.log(`✅ Note translated successfully to ${targetLang}`);
+
+    return res.status(200).json({
+      success: true,
+      message: "Note translated successfully",
+      data: {
+        translatedNotes: translationResult.translatedNotes,
+        translatedFullContent,
+        targetLang,
+        originalNote: {
+          _id: note._id,
+          title: note.title
+        }
+      },
+    });
+
+  } catch (error) {
+    console.error("❌ Error translating note:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to translate note",
+      error: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+    });
+  }
+};
+
+/**
+ * POST /api/notes/translate-text
+ * Translate arbitrary text
+ */
+export const translateText = async (req, res) => {
+  try {
+    const { text, targetLang, sourceLang = 'auto' } = req.body;
+    const userId = req.user?._id;
+
+    console.log("=== BACKEND: Translate Text ===");
+    console.log("Target Language:", targetLang);
+    console.log("Source Language:", sourceLang);
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "User not authenticated",
+      });
+    }
+
+    if (!text || !targetLang) {
+      return res.status(400).json({
+        success: false,
+        message: "Text and target language are required",
+      });
+    }
+
+    // Import translation service
+    const translationService = await import('../services/translationService.mjs');
+
+    // Translate text
+    const result = await translationService.translateText(text, targetLang, sourceLang);
+
+    if (!result.success) {
+      return res.status(500).json({
+        success: false,
+        message: "Translation failed",
+        error: result.error
+      });
+    }
+
+    console.log(`✅ Text translated from ${result.sourceLang} to ${targetLang}`);
+
+    return res.status(200).json({
+      success: true,
+      data: result,
+    });
+
+  } catch (error) {
+    console.error("❌ Error translating text:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to translate text",
+      error: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+    });
+  }
+};
+
+/**
+ * GET /api/notes/languages
+ * Get list of supported languages
+ */
+export const getSupportedLanguages = async (req, res) => {
+  try {
+    const translationService = await import('../services/translationService.mjs');
+    const languages = translationService.getSupportedLanguages();
+
+    return res.status(200).json({
+      success: true,
+      data: languages,
+    });
+  } catch (error) {
+    console.error("❌ Error fetching languages:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch supported languages",
+    });
+  }
+};
+
 export default {
   generateNotes,
   saveNotes,
@@ -469,4 +634,7 @@ export default {
   updateNote,
   deleteNote,
   regenerateNotes,
+  translateNote,
+  translateText,
+  getSupportedLanguages,
 };

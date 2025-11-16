@@ -39,7 +39,19 @@ const COLOR_OPTIONS = [
   { name: "Purple", value: MARKER_MAP["^"].hex, symbol: "^" },
 ];
 
-const LANG_OPTIONS = ["Spanish", "French", "German", "Hindi", "Chinese", "Japanese"];
+const LANG_OPTIONS = [
+  { code: "es", name: "Spanish" },
+  { code: "fr", name: "French" },
+  { code: "de", name: "German" },
+  { code: "hi", name: "Hindi" },
+  { code: "zh-CN", name: "Chinese" },
+  { code: "ja", name: "Japanese" },
+  { code: "ko", name: "Korean" },
+  { code: "ar", name: "Arabic" },
+  { code: "pt", name: "Portuguese" },
+  { code: "ru", name: "Russian" },
+  { code: "it", name: "Italian" },
+];
 
 export default function NoteViewer({ note, onClose, onNoteUpdated }) {
   const [localNote, setLocalNote] = useState(note);
@@ -242,24 +254,97 @@ export default function NoteViewer({ note, onClose, onNoteUpdated }) {
     }
   };
 
-  // --- Simple mock translate (and optionally persist) ---
+  // --- Translate entire note ---
+  const handleTranslateEntireNote = async () => {
+    if (!selectedLanguage || !localNote._id) return;
+    
+    try {
+      setSaving(true);
+      setError("");
+      
+      const res = await fetch(`/api/notes/${localNote._id}/translate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
+        body: JSON.stringify({
+          targetLang: selectedLanguage,
+        }),
+      });
+      
+      if (!res.ok) {
+        const errJSON = await res.json().catch(() => ({}));
+        throw new Error(errJSON.message || "Translation failed");
+      }
+      
+      const data = await res.json();
+      const translatedData = data.data;
+      
+      // Update local note with translated content
+      setLocalNote({
+        ...localNote,
+        structuredNotes: translatedData.translatedNotes,
+        fullContent: translatedData.translatedFullContent,
+        translatedLang: selectedLanguage,
+      });
+      
+      // Clear section translations since entire note is translated
+      setTranslatedSections({});
+      
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Translation failed");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // --- Translate section using backend API ---
   const handleTranslateSection = async (index) => {
     if (!selectedLanguage) return;
     const sections = localNote.structuredNotes?.sections || [];
     const sec = sections[index];
     if (!sec) return;
-    const translated = `[${selectedLanguage} translation] ${sec.content}`;
-    setTranslatedSections((prev) => ({ ...prev, [index]: translated }));
+    
     try {
+      setSaving(true);
+      setError("");
+      
+      // Translate section content
+      const contentRes = await fetch(`/api/notes/translate-text`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
+        body: JSON.stringify({
+          text: sec.content,
+          targetLang: selectedLanguage,
+        }),
+      });
+      
+      if (!contentRes.ok) {
+        throw new Error("Translation failed");
+      }
+      
+      const contentData = await contentRes.json();
+      const translated = contentData.data.translatedText;
+      
+      setTranslatedSections((prev) => ({ ...prev, [index]: translated }));
+      
+      // Optionally save translation to note
       await updateNoteOnServer({
-        isTranslated: true,
-        translatedContent: {
+        [`translatedSection_${index}`]: {
           language: selectedLanguage,
-          content: (localNote.translatedContent?.content || "") + `\nSection ${index}: ${translated}`,
+          content: translated,
         },
       });
     } catch (err) {
-      // handled
+      console.error(err);
+      setError(err.message || "Translation failed");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -476,9 +561,19 @@ export default function NoteViewer({ note, onClose, onNoteUpdated }) {
           >
             <option value="">Select language</option>
             {LANG_OPTIONS.map((lang) => (
-              <option key={lang} value={lang}>{lang}</option>
+              <option key={lang.code} value={lang.code}>{lang.name}</option>
             ))}
           </select>
+          {selectedLanguage && (
+            <button
+              onClick={handleTranslateEntireNote}
+              disabled={!localNote._id || saving}
+              className="px-3 py-1 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition disabled:opacity-50"
+              type="button"
+            >
+              Translate All
+            </button>
+          )}
         </div>
       </div>
 
@@ -493,7 +588,7 @@ export default function NoteViewer({ note, onClose, onNoteUpdated }) {
       {/* Content (rendered with marker->span replacement) */}
       <div className="prose max-w-none mb-6">
         <div
-          className="text-gray-700 break-words"
+          className="text-gray-700 wrap-break-word"
           // Render converted HTML: markers -> spans and newlines -> <br/>
           dangerouslySetInnerHTML={{ __html: renderContentHtml(localNote.fullContent || localNote.content || "") }}
         />
@@ -554,7 +649,7 @@ export default function NoteViewer({ note, onClose, onNoteUpdated }) {
             {localNote.highlights.map((h, i) => (
               <div key={i} className="flex items-center justify-between p-2 rounded-md border">
                 <div>
-                  <div className="text-sm text-gray-700 break-words">{h.text}</div>
+                  <div className="text-sm text-gray-700 wrap-break-word">{h.text}</div>
                   <div className="text-xs text-gray-500">
                     Color: {h.color || h.colorName} {h.position ? ` • pos: ${h.position.start}-${h.position.end}` : ""}
                   </div>
